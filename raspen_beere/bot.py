@@ -116,11 +116,11 @@ class TelegramBot:
         if not await self.check_authentication(update, context):
             return
 
-        temperature = self.dht22.get_temperature()
-        humidity = self.dht22.get_humidity()
+        temperature = await self.dht22.get_temperature()
+        humidity = await self.dht22.get_humidity()
         message = (
             "<b>Sensor Info</b>\n"
-            f"Temperature: {temperature}°C\n"
+            f"Temperatur: {temperature}°C\n"
             f"Luftfeuchtigkeit: {humidity}%"
         )
         await update.message.reply_html(message)
