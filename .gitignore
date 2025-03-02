@@ -171,7 +171,4 @@ cython_debug/
 .pypirc
 
 # Custom
-res/
-keys
-token.pickle
-torrc
+data/

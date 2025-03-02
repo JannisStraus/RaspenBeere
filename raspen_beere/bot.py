@@ -48,7 +48,7 @@ class TelegramBot:
         user = update.effective_user
 
         # Check if the user is blacklisted
-        if str(user.id) in self.blacklist:
+        if user.id == self.admin_id or str(user.id) in self.blacklist:
             await update.message.reply_html(
                 "🚫 Your access has been permanently denied."
             )
