@@ -1,0 +1,3 @@
+python-dotenv
+python-telegram-bot==21.11.1
+adafruit-circuitpython-dht>=4.0.7,<5.0
