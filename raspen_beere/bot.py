@@ -119,10 +119,11 @@ class TelegramBot:
         temperature = self.dht22.get_temperature()
         humidity = self.dht22.get_humidity()
         message = (
-            "*Sensor Info*",
-            f"Temperature: {temperature}°C\n" f"Luftfeuchtigkeit: {humidity}%",
+            "<b>Sensor Info</b>\n"
+            f"Temperature: {temperature}°C\n"
+            f"Luftfeuchtigkeit: {humidity}%"
         )
-        await update.message.reply_markdown(message)
+        await update.message.reply_html(message)
 
     async def button(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         query = update.callback_query
