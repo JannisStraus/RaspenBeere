@@ -1,1 +1,4 @@
-poetry==2.1.1
+python-dotenv>=1.0.1,<2.0
+python-telegram-bot==21.11.1
+adafruit-circuitpython-dht>=4.0.7,<5.0
+filelock>=3.17.0,<4.0
