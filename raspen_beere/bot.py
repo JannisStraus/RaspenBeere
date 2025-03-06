@@ -1,9 +1,12 @@
 import asyncio
 import json
 import logging
+from datetime import datetime
 import os
 from pathlib import Path
 from typing import Any
+import io
+import matplotlib.pyplot as plt
 
 from filelock import FileLock
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
@@ -44,14 +47,14 @@ class TelegramBot:
         with file_path.open("w") as f:
             json.dump(data, f, indent=2)
 
-    def get_last_measurement(self) -> dict[str, Any] | None:
+    def get_last_measurement(self) -> list[dict[str, Any]] | None:
         json_file, lock_file = get_sensor_file()
         with FileLock(str(lock_file)):
             if json_file.is_file():
                 with json_file.open("r") as f:
                     try:
                         data = json.load(f)
-                        return data[-1] if data else None
+                        return data if data else None
                     except json.JSONDecodeError:
                         return None
         return None
@@ -123,15 +126,20 @@ class TelegramBot:
         if not await self.check_authentication(update, context):
             return
 
-        message = "*Available Commands:*\n" "/sensor - Get Sensor infos"
+        message = (
+            "*Available Commands:*\n"
+            "/sensor - Get sensor infos\n"
+            "/graph - Get historical sensor infos"
+        )
         await update.message.reply_markdown(message)
 
     async def sensor(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         if not await self.check_authentication(update, context):
             return
 
-        last_measurement = self.get_last_measurement()
-        if last_measurement:
+        data = self.get_last_measurement()
+        if data:
+            last_measurement = data[-1]
             message = (
                 "<b>Sensor Info</b>\n"
                 f"Temperatur: {last_measurement['temperature']}°C\n"
@@ -140,6 +148,46 @@ class TelegramBot:
         else:
             message = "⚠️ Noch keine Messdaten verfügbar."
         await update.message.reply_html(message)
+
+    async def graph(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+        if not await self.check_authentication(update, context):
+            return
+
+        data = self.get_last_measurement()
+        if data:
+            times = [datetime.strptime(d["timestamp"], "%H:%M") for d in data]
+            temps = [d["temperature"] for d in data]
+            humidities = [d["humidity"] for d in data]
+
+            # Create a plot with two y-axes (temperature and humidity)
+            fig, ax1 = plt.subplots()
+
+            # Plot temperature on primary y-axis
+            ax1.plot(times, temps, "b-", label="Temperature")
+            ax1.set_xlabel("Time")
+            ax1.set_ylabel("Temperature (°C)", color="b")
+            ax1.tick_params(axis="y", labelcolor="b")
+            ax1.legend(loc="upper left")
+
+            # Plot humidity on secondary y-axis
+            ax2 = ax1.twinx()
+            ax2.plot(times, humidities, "r-", label="Humidity")
+            ax2.set_ylabel("Humidity (%)", color="r")
+            ax2.tick_params(axis="y", labelcolor="r")
+            ax2.legend(loc="upper right")
+
+            # Format the x-axis dates nicely
+            fig.autofmt_xdate()
+
+            # Save the plot to a BytesIO buffer
+            buf = io.BytesIO()
+            plt.savefig(buf, format="png")
+            buf.seek(0)
+            plt.close(fig)
+            await update.message.reply_photo(buf, "Todays sensor data")
+        else:
+            message = "⚠️ Noch keine Messdaten verfügbar."
+            await update.message.reply_html(message)
 
     async def button(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         query = update.callback_query
