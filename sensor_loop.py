@@ -71,7 +71,7 @@ def sleep_duration(period_minutes: int = 0, period_seconds: int = 10) -> float:
 
 def main() -> None:
     while True:
-        time.sleep(sleep_duration(10, 0))
+        time.sleep(sleep_duration(30, 0))
         now = datetime.now()
         temperature, humidity = read_sensor()
         save_data(now, temperature, humidity)
