@@ -135,7 +135,7 @@ class TelegramBot:
             message = (
                 "<b>Sensor Info</b>\n"
                 f"Temperatur: {last_measurement['temperature']}°C\n"
-                f"Luftfeuchtigkeit: {last_measurement['temperature']}%"
+                f"Luftfeuchtigkeit: {last_measurement['humidity']}%"
             )
         else:
             message = "⚠️ Noch keine Messdaten verfügbar."
