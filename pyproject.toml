@@ -6,7 +6,7 @@ authors = [ "Jannis Straus <jannisstraus1408@gmail.com>" ]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.12"
+python = "^3.11"
 python-dotenv = "^1.0.1"
 python-telegram-bot = "21.11.1"
 adafruit-circuitpython-dht = "^4.0.7"
