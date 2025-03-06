@@ -5,10 +5,12 @@ import os
 from pathlib import Path
 from typing import Any
 
+from filelock import FileLock
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import Application, CallbackQueryHandler, CommandHandler, ContextTypes
 
-from raspen_beere.sensor import DHT22
+from raspen_beere.dht22 import DHT22
+from raspen_beere.file import get_sensor_file
 
 # Set logging level for external libraries
 logging.getLogger("httpx").setLevel(logging.WARNING)
@@ -41,6 +43,18 @@ class TelegramBot:
     def save_json_users(self, file_path: Path, data: dict[str, dict[str, Any]]) -> None:
         with file_path.open("w") as f:
             json.dump(data, f, indent=2)
+
+    def get_last_measurement(self) -> dict[str, Any] | None:
+        json_file, lock_file = get_sensor_file()
+        with FileLock(str(lock_file)):
+            if json_file.is_file():
+                with json_file.open("r") as f:
+                    try:
+                        data = json.load(f)
+                        return data[-1] if data else None
+                    except json.JSONDecodeError:
+                        return None
+        return None
 
     async def check_authentication(
         self, update: Update, context: ContextTypes.DEFAULT_TYPE
@@ -116,13 +130,15 @@ class TelegramBot:
         if not await self.check_authentication(update, context):
             return
 
-        temperature = await self.dht22.get_temperature()
-        humidity = await self.dht22.get_humidity()
-        message = (
-            "<b>Sensor Info</b>\n"
-            f"Temperatur: {temperature}°C\n"
-            f"Luftfeuchtigkeit: {humidity}%"
-        )
+        last_measurement = self.get_last_measurement()
+        if last_measurement:
+            message = (
+                "<b>Sensor Info</b>\n"
+                f"Temperatur: {last_measurement['temperature']}°C\n"
+                f"Luftfeuchtigkeit: {last_measurement['temperature']}%"
+            )
+        else:
+            message = "⚠️ Noch keine Messdaten verfügbar."
         await update.message.reply_html(message)
 
     async def button(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -178,6 +194,7 @@ class TelegramBot:
         self.app.add_handler(CommandHandler("help", self.start))
         self.app.add_handler(CommandHandler("sensor", self.sensor))
         self.app.add_handler(CallbackQueryHandler(self.button))
+        # self.app.add_error_handler(self.error_handler)
         self.app.run_polling(allowed_updates=Update.ALL_TYPES)
 
 
