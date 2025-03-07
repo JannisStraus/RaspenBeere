@@ -186,9 +186,9 @@ class TelegramBot:
         buf.seek(0)
         plt.close(fig)
         await update.message.reply_photo(buf, "Todays sensor data")
-        else:
-            message = "⚠️ Noch keine Messdaten verfügbar."
-            await update.message.reply_html(message)
+    else:
+        message = "⚠️ Noch keine Messdaten verfügbar."
+        await update.message.reply_html(message)
 
     async def button(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         query = update.callback_query
