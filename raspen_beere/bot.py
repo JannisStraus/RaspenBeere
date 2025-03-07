@@ -1,14 +1,15 @@
 import asyncio
+import io
 import json
 import logging
-from datetime import datetime
 import os
+from datetime import datetime
 from pathlib import Path
 from typing import Any
-import io
-import matplotlib.pyplot as plt
 
+import matplotlib.pyplot as plt
 from filelock import FileLock
+from matplotlib.dates import DateFormatter
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import Application, CallbackQueryHandler, CommandHandler, ContextTypes
 
@@ -154,37 +155,37 @@ class TelegramBot:
             return
 
         data = self.get_last_measurement()
-        if data:
-            times = [datetime.strptime(d["timestamp"], "%H:%M") for d in data]
-            temps = [d["temperature"] for d in data]
-            humidities = [d["humidity"] for d in data]
+    if data:
+        times = [datetime.strptime(d["timestamp"], "%H:%M") for d in data]
+        temps = [d["temperature"] for d in data]
+        humidities = [d["humidity"] for d in data]
 
-            # Create a plot with two y-axes (temperature and humidity)
-            fig, ax1 = plt.subplots()
+        # Create a plot with two y-axes (temperature and humidity)
+        fig, ax1 = plt.subplots()
 
-            # Plot temperature on primary y-axis
-            ax1.plot(times, temps, "b-", label="Temperature")
-            ax1.set_xlabel("Time")
-            ax1.set_ylabel("Temperature (°C)", color="b")
-            ax1.tick_params(axis="y", labelcolor="b")
-            ax1.legend(loc="upper left")
+        # Plot temperature on primary y-axis
+        ax1.plot(times, temps, "b-", label="Temperature")
+        ax1.set_xlabel("Time")
+        ax1.set_ylabel("Temperature (°C)", color="b")
+        ax1.tick_params(axis="y", labelcolor="b")
+        ax1.legend(loc="upper left")
 
-            # Plot humidity on secondary y-axis
-            ax2 = ax1.twinx()
-            ax2.plot(times, humidities, "r-", label="Humidity")
-            ax2.set_ylabel("Humidity (%)", color="r")
-            ax2.tick_params(axis="y", labelcolor="r")
-            ax2.legend(loc="upper right")
+        # Plot humidity on secondary y-axis
+        ax2 = ax1.twinx()
+        ax2.plot(times, humidities, "r-", label="Humidity")
+        ax2.set_ylabel("Humidity (%)", color="r")
+        ax2.tick_params(axis="y", labelcolor="r")
+        ax2.legend(loc="upper right")
 
-            # Format the x-axis dates nicely
-            fig.autofmt_xdate()
+        ax1.xaxis.set_major_formatter(DateFormatter('%H:%M'))
+        fig.autofmt_xdate()
 
-            # Save the plot to a BytesIO buffer
-            buf = io.BytesIO()
-            plt.savefig(buf, format="png")
-            buf.seek(0)
-            plt.close(fig)
-            await update.message.reply_photo(buf, "Todays sensor data")
+        # Save the plot to a BytesIO buffer
+        buf = io.BytesIO()
+        plt.savefig(buf, format="png")
+        buf.seek(0)
+        plt.close(fig)
+        await update.message.reply_photo(buf, "Todays sensor data")
         else:
             message = "⚠️ Noch keine Messdaten verfügbar."
             await update.message.reply_html(message)
