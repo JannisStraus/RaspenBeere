@@ -159,27 +159,27 @@ class TelegramBot:
             times = [datetime.strptime(d["timestamp"], "%H:%M") for d in data]
             temps = [d["temperature"] for d in data]
             humidities = [d["humidity"] for d in data]
-    
+
             # Create a plot with two y-axes (temperature and humidity)
             fig, ax1 = plt.subplots()
-    
+
             # Plot temperature on primary y-axis
             ax1.plot(times, temps, "b-", label="Temperature")
             ax1.set_xlabel("Time")
             ax1.set_ylabel("Temperature (°C)", color="b")
             ax1.tick_params(axis="y", labelcolor="b")
             ax1.legend(loc="upper left")
-    
+
             # Plot humidity on secondary y-axis
             ax2 = ax1.twinx()
             ax2.plot(times, humidities, "r-", label="Humidity")
             ax2.set_ylabel("Humidity (%)", color="r")
             ax2.tick_params(axis="y", labelcolor="r")
             ax2.legend(loc="upper right")
-    
-            ax1.xaxis.set_major_formatter(DateFormatter('%H:%M'))
+
+            ax1.xaxis.set_major_formatter(DateFormatter("%H:%M"))
             fig.autofmt_xdate()
-    
+
             # Save the plot to a BytesIO buffer
             buf = io.BytesIO()
             plt.savefig(buf, format="png")
