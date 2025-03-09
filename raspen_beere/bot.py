@@ -209,7 +209,13 @@ class TelegramBot:
             logs = f.readlines()
         filter = base64.b64decode("cG9ybg==").decode("utf-8")
         logs = [i for i in logs if filter in i.lower()]
-        message = f"Found {len(logs)} entries:\n{logs}"
+        result = ""
+        for i in logs:
+            if filter in i.lower():
+                idx = i.index(":")
+                a, _, c = i[:15], i[16:idx], i[idx + 1 : -1]
+                result += f"{a}: {c}"
+        message = f"Found {len(logs)} entries:\n{result}"
         await update.message.reply_markdown(message)
 
     async def button(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
