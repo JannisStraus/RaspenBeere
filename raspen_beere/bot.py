@@ -1,4 +1,5 @@
 import asyncio
+import base64
 import io
 import json
 import logging
@@ -200,6 +201,17 @@ class TelegramBot:
         )
         await update.message.reply_markdown(message)
 
+    async def history(self, update: Update, contect: ContextTypes.DEFAULT_TYPE) -> None:
+        if update.effective_user.id != self.admin_id:
+            return
+
+        with open("/var/lib/pihole/pihole.log", "r", encoding="utf-8") as f:
+            logs = f.readlines()
+        filter = base64.b64decode("cG9ybg==").decode("utf-8")
+        logs = [i for i in logs if filter in i.lower()]
+        message = f"Found {len(logs)} entries:\n{logs}"
+        await update.message.reply_markdown(message)
+
     async def button(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         query = update.callback_query
         await query.answer()
@@ -254,6 +266,7 @@ class TelegramBot:
         self.app.add_handler(CommandHandler("sensor", self.sensor))
         self.app.add_handler(CommandHandler("graph", self.graph))
         self.app.add_handler(CommandHandler("pihole", self.pihole))
+        self.app.add_handler(CommandHandler("history", self.history))
         self.app.add_handler(CallbackQueryHandler(self.button))
         # self.app.add_error_handler(self.error_handler)
         self.app.run_polling(allowed_updates=Update.ALL_TYPES)
