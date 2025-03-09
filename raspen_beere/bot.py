@@ -205,7 +205,7 @@ class TelegramBot:
         if update.effective_user.id != self.admin_id:
             return
 
-        with open("/var/lib/pihole/pihole.log", "r", encoding="utf-8") as f:
+        with open("/var/log/pihole/pihole.log", "r", encoding="utf-8") as f:
             logs = f.readlines()
         filter = base64.b64decode("cG9ybg==").decode("utf-8")
         logs = [i for i in logs if filter in i.lower()]
