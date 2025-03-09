@@ -214,7 +214,7 @@ class TelegramBot:
             if filter in i.lower():
                 idx = i.index(":")
                 a, _, c = i[:15], i[16:idx], i[idx + 1 : -1]
-                result += f"{a}: {c}"
+                result += f"{a}: {c.replace('\n', '')}\n"
         message = f"Found {len(logs)} entries:\n{result}"
         await update.message.reply_markdown(message)
 
