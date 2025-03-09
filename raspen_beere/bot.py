@@ -253,6 +253,7 @@ class TelegramBot:
         self.app.add_handler(CommandHandler("help", self.start))
         self.app.add_handler(CommandHandler("sensor", self.sensor))
         self.app.add_handler(CommandHandler("graph", self.graph))
+        self.app.add_handler(CommandHandler("pihole", self.graph))
         self.app.add_handler(CallbackQueryHandler(self.button))
         # self.app.add_error_handler(self.error_handler)
         self.app.run_polling(allowed_updates=Update.ALL_TYPES)
