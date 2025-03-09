@@ -190,6 +190,16 @@ class TelegramBot:
             message = "⚠️ Noch keine Messdaten verfügbar."
             await update.message.reply_html(message)
 
+    async def pihole(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+        if update.effective_user.id != self.admin_id:
+            return
+
+        message = (
+            f"URL: http://192.168.0.188/admin\n"
+            f"Password: {os.environ['PIHOLE_PASSWORD']}"
+        )
+        await update.message.reply_markdown(message)
+
     async def button(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         query = update.callback_query
         await query.answer()
